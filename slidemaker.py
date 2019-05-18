@@ -5,6 +5,7 @@ import os
 
 
 class AppProp:
+    silent = False
 
     def __init__(self, arg):
         self.arg = arg
@@ -30,19 +31,27 @@ Licensed by MIT license
             for line in file:
                 print(line.replace(searchStr, replaceStr), end='')
 
+    @staticmethod
+    def log(statement):
+        if not AppProp.silent:
+            print(statement)
+
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--version', help='Show the version and exit',
-                        action='store_true', default=False)
+    parser.add_argument(
+        '-v', '--version', help='Show the version and exit', action='store_true', default=False)
     parser.add_argument(
         '-d', '--directory', help='Set slide directory', action='store', default=None)
+    parser.add_argument(
+        '-s', '--silent', help='Disable the logging', action='store_true', default=False)
     appargs = parser.parse_args()
 
     if appargs.version:
         AppProp.version()
     else:
-        print('Slide Maker')
+        AppProp.silent = True if appargs.silent else False
+        AppProp.log('Slide Maker')
         if appargs.directory:
             if os.path.isdir(appargs.directory):
                 proot = os.path.dirname(os.path.realpath(__file__))
@@ -51,28 +60,30 @@ def main():
                 if os.path.exists(phtm) and os.path.exists(pmd):
                     phtml = os.path.join(appargs.directory, 'index.html')
                     if os.path.exists(phtml):
-                        print('- Removing already existing .html file')
+                        AppProp.log('- Removing already existing .html file')
                         os.remove(phtml)
-                    print('- Creating new .html file')
+                    AppProp.log('- Creating new .html file')
                     shutil.copy(phtm, phtml)
-                    print('- Extracting content from .md file')
+                    AppProp.log('- Extracting content from .md file')
                     tmd = AppProp.readFileAsStr(pmd)
-                    print('- Inserting content of .md file into .html file')
+                    AppProp.log(
+                        '- Inserting content of .md file into .html file')
                     AppProp.replaceStrInFile(phtml, '<!--[SLIDE]-->', tmd)
                     pcss = os.path.join(appargs.directory, 'slide.css')
                     if os.path.exists(pcss):
-                        print('- Extracting content from .css file')
+                        AppProp.log('- Extracting content from .css file')
                         tcss = AppProp.readFileAsStr(pcss)
-                        print('- Inserting content of .css file into .html file')
+                        AppProp.log(
+                            '- Inserting content of .css file into .html file')
                         AppProp.replaceStrInFile(phtml, '/*[STYLE]*/', tcss)
                 else:
-                    print('Error: Either .htm or .md file is missing')
+                    AppProp.log('Error: Either .htm or .md file is missing')
             else:
-                print('Error: Provided directory path does not exist')
+                AppProp.log('Error: Provided directory path does not exist')
         else:
-            print('Error: Directory path is missing')
+            AppProp.log('Error: Directory path is missing')
 
-    print('Done!')
+    AppProp.log('Done!')
 
 if __name__ == "__main__":
     main()

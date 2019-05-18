@@ -3,7 +3,7 @@ ROOT_DIR="$PWD"
 USER_DIR="$HOME"
 
 dirs=(
-	"S01_Introduction_&_setup_of_node.js" 
+	"S01_Introduction_and_setup_of_node.js" 
 	"S02_Core_concepts_of_JS" 
 	"S03_Useful_ES6_features" 
 	"S04_Node_JS_Modules" 
@@ -19,50 +19,74 @@ dirs=(
 	"S14_Project_Development" 
 )
 
+silent=1
+
 version() {
 	echo " Builder   version 1.0 \n Copyright (c) 2019 Abhishek Kumar. All rights reserved. \n"
 }
 
 help() {
 	echo "\n Builder's options are:\n"
-    echo "  -v  --version       to see the current version of the app"
-    echo "  -g  --gends         to generate folder structure for all sessions"
-    echo "  -r  --remds         to remove folder structure for all sessions"
-    echo "  -b  --build         to build slides for all sessions"
-    echo "  -h  --help          to see the menu of command line options"
-    echo "\n Please choose accordingly. \n"
+	echo "  -v  --version       to see the current version of the app"
+	echo "  -g  --gends         to generate folder structure for all sessions"
+	echo "  -r  --remds         to remove folder structure for all sessions"
+	echo "  -b  --build         to build slides for all sessions"
+	echo "  -s  --silent        to perform action without logging"
+	echo "  -h  --help          to see the menu of command line options"
+	echo "\n Please choose accordingly. \n"
+}
+
+islog() {
+	case "$1" in
+    '-s')
+		silent=0
+	;;
+    '--silent')
+        silent=0
+    ;;
+    esac
+}
+
+print() {
+	if [[ $silent == 1 ]]; then
+		echo "$1"
+	fi
 }
 
 gends() {
-    echo " Generating folders for"
+    print " Generating folders for"
     for i in "${dirs[@]}"
 	do
-		echo " - $i"
+		print " - $i"
 		mkdir "docs/$i"
         touch "docs/$i/slide.css"
         touch "docs/$i/slide.md"
 	done
-    echo " Done! \n"
+    print " Done! \n"
 }
 
 remds() {
-    echo " Removing folders for"
+    print " Removing folders for"
     for i in "${dirs[@]}"
 	do
-		echo " - $i"
+		print " - $i"
 		rm -rf "docs/$i"
 	done
-    echo " Done! \n"
+    print " Done! \n"
 }
 
 build() {
-	echo " Building slides for"
+	print " Building slides for"
 	for i in "${dirs[@]}"
 	do
-		echo "- $i"
-		python3 slidemaker.py -d="docs/$i"
+		print " - $i"
+		if [[ $silent == 1 ]]; then
+			python3 slidemaker.py -d="docs/$i"
+		else 
+			python3 slidemaker.py -s -d="docs/$i"
+		fi	
 	done
-	echo " Done! \n"
+	print " Done! \n"
 }
 
 if [[ "$1" == "" ]]; then 
@@ -71,21 +95,27 @@ if [[ "$1" == "" ]]; then
     cd $ROOT_DIR
 	case "$1" in
     '-g')
+		islog "$2"
 		gends
 	;;
     '--gends')
+		islog "$2"
 		gends
     ;;
     '-r')
+		islog "$2"
 		remds
 	;;
     '--remds')
+		islog "$2"
 		remds
     ;;
     '-b')
+		islog "$2"
 		build
 	;;
     '--build')
+		islog "$2"
         build
     ;;
     '-v')
