@@ -83,7 +83,7 @@ def main():
         else:
             AppProp.log('Error: Directory path is missing')
 
-    AppProp.log('Done!')
+    AppProp.log('Finished!')
 
 if __name__ == "__main__":
     main()

@@ -31,6 +31,7 @@ help() {
 	echo "  -g  --gends         to generate folder structure for all sessions"
 	echo "  -r  --remds         to remove folder structure for all sessions"
 	echo "  -b  --build         to build slides for all sessions"
+	echo "  -w  --watch         to watch for auto-rebuild when file changes"
 	echo "  -s  --silent        to perform action without logging"
 	echo "  -h  --help          to see the menu of command line options"
 	echo "\n Please choose accordingly. \n"
@@ -57,7 +58,7 @@ gends() {
     print " Generating folders for"
     for i in "${dirs[@]}"
 	do
-		print " - $i"
+		print " • $i"
 		mkdir "docs/$i"
         touch "docs/$i/slide.css"
         touch "docs/$i/slide.md"
@@ -69,7 +70,7 @@ remds() {
     print " Removing folders for"
     for i in "${dirs[@]}"
 	do
-		print " - $i"
+		print " • $i"
 		rm -rf "docs/$i"
 	done
     print " Done! \n"
@@ -79,14 +80,25 @@ build() {
 	print " Building slides for"
 	for i in "${dirs[@]}"
 	do
-		print " - $i"
+		print "\n • $i \n"
 		if [[ $silent == 1 ]]; then
 			python3 slidemaker.py -d="docs/$i"
 		else 
 			python3 slidemaker.py -s -d="docs/$i"
 		fi	
 	done
-	print " Done! \n"
+	print "\n Done! \n"
+}
+
+watch() {
+	print " Watching docs/ folder"
+	trap "exit 0" SIGINT SIGTERM; 
+	while true
+	do
+		fswatch -1 docs/
+		build
+		sleep 1
+	done
 }
 
 if [[ "$1" == "" ]]; then 
@@ -117,6 +129,14 @@ if [[ "$1" == "" ]]; then
     '--build')
 		islog "$2"
         build
+    ;;
+    '-w')
+		islog "$2"
+		watch
+	;;
+    '--watch')
+		islog "$2"
+        watch
     ;;
     '-v')
 		version
